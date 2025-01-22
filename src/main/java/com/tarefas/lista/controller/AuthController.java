@@ -1,5 +1,7 @@
 package com.tarefas.lista.controller;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -7,9 +9,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tarefas.lista.config.JwtUtil;
+import com.tarefas.lista.controller.dto.UserAuthenticationDto;
 import com.tarefas.lista.login.LoginRequest;
-
 
 import jakarta.validation.Valid;
 
@@ -17,20 +22,33 @@ import jakarta.validation.Valid;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+   @Autowired
+   private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtUtil jwtUtil; 
+   @Autowired
+   private JwtUtil jwtUtil;
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest){
-       Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-       );
-          SecurityContextHolder.getContext().setAuthentication(authentication);
-          String jwtToken = jwtUtil.generateToken(loginRequest.getUsername());
+   private final ObjectMapper objectMapper;
 
-          return ResponseEntity.ok(jwtToken);
+    public AuthController()
+    {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+    }
+
+   @PostMapping("/login")
+   public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
+      Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+      var userAuthenticationDto = new UserAuthenticationDto();
+      userAuthenticationDto.setToken(jwtUtil.generateToken(loginRequest.getUsername()));
+      try {
+         return ResponseEntity.ok(objectMapper.writeValueAsString(userAuthenticationDto));
+      }catch (Exception exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
         }
+   }
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -21,9 +22,15 @@ public class Users{
    @Column( nullable = true)
     private String fullName;
     
-    @NotBlank(message = "O nome de uruario é obrigatorio")
+    @NotBlank(message = "O nome de usuario é obrigatorio")
     @Column(nullable = false, unique = true)
     private String username;
+    
+    @NotBlank(message = "Email já cadastrado")
+    @Email(message = "Digite um email valido")
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+    
     
     @Column(nullable = false)
     private String password;

@@ -18,7 +18,7 @@ import com.tarefas.lista.classe.Tarefa;
 import com.tarefas.lista.service.TarefaService;
 
 @RestController
-@RequestMapping("tarefas")
+@RequestMapping("/tarefas")
 public class TarefaController {
 
     @Autowired

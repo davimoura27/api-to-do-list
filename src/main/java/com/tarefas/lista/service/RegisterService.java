@@ -14,12 +14,21 @@ public class RegisterService {
     private UserRepository userRepository;
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
+        
     public void saveUser(Users users){
-
-     users.setPassword(passwordEncoder.encode(users.getPassword()));
-
-       userRepository.save(users);
+      
+      users.setPassword(passwordEncoder.encode(users.getPassword()));      
+      userRepository.save(users);
+      sendEmailNotification(users);
     }
+    private void sendEmailNotification(Users users){
+      String subject = "Bem vindo!";
+      String text = "Você foi cadastrado com sucesso " + users.getFullName().toUpperCase() ;
+      emailService.sendEmail(users.getEmail(), text, subject);
+    }  
 }

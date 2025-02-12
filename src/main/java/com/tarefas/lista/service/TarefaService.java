@@ -39,9 +39,9 @@ public class TarefaService {
             Tarefa tarefa = tarefasExistentes.get();
 
             tarefa.setTitulo(tarefaUpdate.getTitulo());
-            tarefa.setDescricao(tarefaUpdate.getDescricao());
+            tarefa.setCategoria(tarefaUpdate.getCategoria());
             tarefa.setStatus(tarefaUpdate.getStatus());
-            tarefa.setData(tarefaUpdate.getData());
+      
 
             return tarefaRepository.save(tarefa);
         } else {

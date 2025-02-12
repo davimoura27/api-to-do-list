@@ -1,6 +1,6 @@
 package com.tarefas.lista.classe;
 
-import java.time.LocalDate;
+
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,11 +20,11 @@ public class Tarefa {
     @Column(name = "title", nullable = false)
     private String titulo;
 
-    @Column(name = "description", length = 500)
-    private String descricao;
+    @Column(name = "categoria")
+    private String categoria;
 
     @Column(name = "status", nullable = false)
     private String status;
 
-    private LocalDate data;
+    
 }

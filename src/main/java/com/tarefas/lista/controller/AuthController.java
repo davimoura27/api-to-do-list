@@ -15,6 +15,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tarefas.lista.config.JwtUtil;
 import com.tarefas.lista.controller.dto.UserAuthenticationDto;
 import com.tarefas.lista.login.LoginRequest;
+import com.tarefas.lista.repository.UserRepository;
 
 import jakarta.validation.Valid;
 
@@ -24,6 +25,9 @@ public class AuthController {
 
    @Autowired
    private AuthenticationManager authenticationManager;
+
+   @Autowired
+   private UserRepository userRepository;
 
    @Autowired
    private JwtUtil jwtUtil;
@@ -41,10 +45,16 @@ public class AuthController {
       Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
       SecurityContextHolder.getContext().setAuthentication(authentication);
+     
+      var userDetails = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+
+      var user = userRepository.findByUsername(userDetails.getUsername())
+      .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
 
 
       var userAuthenticationDto = new UserAuthenticationDto();
-      userAuthenticationDto.setToken(jwtUtil.generateToken(loginRequest.getUsername()));
+      userAuthenticationDto.setToken(jwtUtil.generateToken(user.getUsername()));
+      userAuthenticationDto.setUserId(user.getId());
       try {
          return ResponseEntity.ok(objectMapper.writeValueAsString(userAuthenticationDto));
       }catch (Exception exception) {

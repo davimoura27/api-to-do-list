@@ -4,10 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.tarefas.lista.classe.Tarefa;
+import com.tarefas.lista.entity.Tarefa;
+import com.tarefas.lista.entity.Users;
 import com.tarefas.lista.repository.TarefaRepository;
+import com.tarefas.lista.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -18,13 +22,25 @@ public class TarefaService {
     @Autowired
     private TarefaRepository tarefaRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+
     public Tarefa create(Tarefa tarefa) {
+        String username = SecurityContextHolder.getContext()
+        .getAuthentication().getName();
+        Users usuario = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("Usuario não encontrado"));
+        tarefa.setUsuario(usuario);
         return tarefaRepository.save(tarefa);
 
     }
     public List<Tarefa> getList(){
-        List<Tarefa>tarefa = tarefaRepository.findAll();
-        return tarefa.stream().toList();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users usuario = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("Usuario não encontrado"));
+
+        return tarefaRepository.findByUsuario(usuario);
     }
 
     public Tarefa getById(Long id) {
@@ -33,20 +49,29 @@ public class TarefaService {
     }
 
     public Tarefa update(Long id, Tarefa tarefaUpdate) {
-        Optional<Tarefa> tarefasExistentes = tarefaRepository.findById(id);
+       Tarefa tarefa = getById(id);
 
-        if (tarefasExistentes.isPresent()) {
-            Tarefa tarefa = tarefasExistentes.get();
+       String username = SecurityContextHolder.getContext().getAuthentication().getName();
+       Users usuario = userRepository.findByUsername(username)
+       .orElseThrow(() -> new UsernameNotFoundException("Usuario não encontrado"));
 
-            tarefa.setTitulo(tarefaUpdate.getTitulo());
-            tarefa.setCategoria(tarefaUpdate.getCategoria());
-            tarefa.setStatus(tarefaUpdate.getStatus());
-      
+       if (!tarefa.getUsuario().equals(usuario)) {
+        throw new SecurityException("Usuaio não tem permissão para editar essa tarefa");
+                
+       }
+       if (tarefaUpdate.getTitulo() != null) {
+         tarefa.setTitulo(tarefaUpdate.getTitulo());
+       }
+       if (tarefaUpdate.getCategoria() != null) {
+        tarefa.setCategoria(tarefaUpdate.getCategoria());
+        
+       }
+    if (tarefaUpdate.getStatus() != null) {
+        tarefa.setStatus(tarefaUpdate.getStatus());
+    }
+    return tarefaRepository.save(tarefa);
 
-            return tarefaRepository.save(tarefa);
-        } else {
-            throw new RuntimeException("Tarefa com o Id" + id + "não encontrada");
-        }
+
 
     }
 

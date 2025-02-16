@@ -1,4 +1,4 @@
-package com.tarefas.lista.classe;
+package com.tarefas.lista.entity;
 
 
 
@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Data
@@ -24,7 +26,9 @@ public class Tarefa {
     private String categoria;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    private String status = "pendente";
 
-    
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users usuario;
 }

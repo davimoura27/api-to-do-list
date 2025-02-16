@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
-import com.tarefas.lista.classe.Tarefa;
+
+import com.tarefas.lista.entity.Tarefa;
 import com.tarefas.lista.service.TarefaService;
 
 @RestController
@@ -57,7 +58,7 @@ public class TarefaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTarefa(@PathVariable Long id) {
         tarefaService.delete(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Tarefa com ID" + id + " foi deletada");
+        return ResponseEntity.status(HttpStatus.OK).body("Tarefa com ID " + id + " foi deletada");
     }
 
 }
